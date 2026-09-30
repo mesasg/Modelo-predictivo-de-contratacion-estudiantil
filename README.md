@@ -4,7 +4,7 @@
 Modelos y Simulación de Sistemas I · Universidad de Antioquia · 2026-2 · Docente: Andrés Parra
 
 ## Integrantes
-- Juan Manuel Tabares Uribe – [@juanmanuel-tabares](https://github.com/usuario)
+- Juan Manuel Tabares Uribe – [@juanmanuel-tabares](https://github.com/juanmanuel-tabares)
 - Sara Mesa Gómez – [@mesasg](https://github.com/mesasg)
 
 ## Descripción del problema
