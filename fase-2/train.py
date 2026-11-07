@@ -69,7 +69,7 @@ def imprimir_resumen(resultado):
     print(f"\nVersión '{resultado['version']}' entrenada y guardada.")
     print(f"Evaluación en prueba ({m['n_prueba']} filas):")
     print(f"  {'Métrica':<16}{'Modelo':>10}{'Base':>10}")
-    for nombre in ("roc_auc", "f1_clase0", "recall_clase0", "accuracy"):
+    for nombre in ("roc_auc", "f1_clase0", "recall_clase0", "precision_clase0", "accuracy"):
         print(f"  {nombre:<16}{m['modelo'][nombre]:>10.4f}{m['modelo_base'][nombre]:>10.4f}")
     if m["validacion_cruzada"]:
         auc = m["validacion_cruzada"]["roc_auc"]

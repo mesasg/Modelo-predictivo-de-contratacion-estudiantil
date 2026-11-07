@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.config import COLUMNAS_CATEGORICAS, COLUMNAS_ENTRADA, COLUMNAS_NUMERICAS
+from src.config import COLUMNAS_CATEGORICAS, COLUMNAS_CONTEO, COLUMNAS_ENTRADA, COLUMNAS_NUMERICAS, RANGOS
 
 
 class ErrorDatos(ValueError):
@@ -32,6 +32,7 @@ def preparar_variables(df):
     - Falla si falta alguna columna obligatoria (una celda nula sí se admite).
     - Ignora columnas adicionales y las devuelve para informarlas.
     - Convierte las numéricas a número y las categóricas a texto, conservando los nulos.
+    - Falla si una numérica está fuera de su rango o si un conteo no es entero.
     """
     faltantes = [c for c in COLUMNAS_ENTRADA if c not in df.columns]
     if faltantes:
@@ -48,6 +49,7 @@ def preparar_variables(df):
                 f"La columna '{col}' debe ser numérica; valores no válidos: {ejemplos}"
             )
         X[col] = convertida.astype(float)
+        _validar_rango(X[col], col)
 
     for col in COLUMNAS_CATEGORICAS:
         X[col] = X[col].where(X[col].isna(), X[col].astype(str)).astype(object)
@@ -55,6 +57,25 @@ def preparar_variables(df):
 
     adicionales = [c for c in df.columns if c not in COLUMNAS_ENTRADA]
     return X, adicionales
+
+
+def _validar_rango(valores, col):
+    """Los nulos se admiten (se imputan); los valores presentes deben estar dentro del dominio."""
+    minimo, maximo = RANGOS[col]
+    fuera = valores < minimo
+    if maximo is not None:
+        fuera |= valores > maximo
+    if fuera.any():
+        limite = f"[{minimo}, {maximo}]" if maximo is not None else f">= {minimo}"
+        ejemplos = valores[fuera].unique()[:3].tolist()
+        raise ErrorDatos(
+            f"La columna '{col}' tiene {int(fuera.sum())} valores fuera del rango {limite}: {ejemplos}"
+        )
+    if col in COLUMNAS_CONTEO:
+        no_enteros = valores.notna() & (valores % 1 != 0)
+        if no_enteros.any():
+            ejemplos = valores[no_enteros].unique()[:3].tolist()
+            raise ErrorDatos(f"La columna '{col}' es un conteo y debe ser entera; valores no válidos: {ejemplos}")
 
 
 def preparar_objetivo(df, target):

@@ -1,10 +1,11 @@
-"""Métricas de evaluación: ROC-AUC (principal), F1 y recall de la clase 0, accuracy."""
+"""Métricas de evaluación: ROC-AUC (principal), F1, recall y precisión de la clase 0, accuracy."""
 
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
     f1_score,
     make_scorer,
+    precision_score,
     recall_score,
     roc_auc_score,
 )
@@ -19,6 +20,8 @@ def evaluar(modelo, X, y):
         "roc_auc": float(roc_auc_score(y, proba)),
         "f1_clase0": float(f1_score(y, pred, pos_label=0, zero_division=0)),
         "recall_clase0": float(recall_score(y, pred, pos_label=0, zero_division=0)),
+        # Proporción de alertas de "no contratado" que son correctas
+        "precision_clase0": float(precision_score(y, pred, pos_label=0, zero_division=0)),
         "accuracy": float(accuracy_score(y, pred)),
         # Filas: clase real (0, 1); columnas: clase predicha (0, 1)
         "matriz_confusion": confusion_matrix(y, pred, labels=[0, 1]).tolist(),
@@ -36,6 +39,7 @@ def validacion_cruzada(modelo, X, y, folds, semilla):
         "roc_auc": "roc_auc",
         "f1_clase0": make_scorer(f1_score, pos_label=0, zero_division=0),
         "recall_clase0": make_scorer(recall_score, pos_label=0, zero_division=0),
+        "precision_clase0": make_scorer(precision_score, pos_label=0, zero_division=0),
         "accuracy": "accuracy",
     }
     res = cross_validate(modelo, X, y, cv=cv, scoring=scoring)

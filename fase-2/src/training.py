@@ -8,6 +8,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import scipy
 import sklearn
 from sklearn.model_selection import train_test_split
 
@@ -45,6 +46,7 @@ def entrenar(
 
     # 2. Nulos simulados como en la Fase 1 (la máscara es independiente de y)
     X = simular_nulos(X, tasa_nulos, semilla)
+    filas_con_nulos = float(X.isna().any(axis=1).mean())
 
     # 3. Separación antes de ajustar cualquier transformación. Cada fila es un estudiante
     #    distinto, así que no hay grupos que mantener juntos; se estratifica por la clase.
@@ -81,14 +83,15 @@ def entrenar(
     metadatos = _metadatos(
         version=version, inicio=inicio, ruta_datos=Path(ruta_datos), df=df, target=target,
         ignoradas=ignoradas, modelo=modelo, semilla=semilla, tamano_prueba=tamano_prueba,
-        folds_cv=folds_cv, tasa_nulos=tasa_nulos, y_train=y_train, y_test=y_test,
+        folds_cv=folds_cv, tasa_nulos=tasa_nulos, filas_con_nulos=filas_con_nulos,
+        y_train=y_train, y_test=y_test,
     )
     rutas = guardar_version(directorio_salida, version, modelo, metricas, metadatos)
     return {"version": version, "metricas": metricas, "rutas": rutas, "columnas_ignoradas": ignoradas}
 
 
 def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, semilla,
-               tamano_prueba, folds_cv, tasa_nulos, y_train, y_test):
+               tamano_prueba, folds_cv, tasa_nulos, filas_con_nulos, y_train, y_test):
     prep = modelo.named_steps["preprocesador"]
     estimador = modelo.named_steps["modelo"]
     imputador_num = prep.named_transformers_["num"]["imputer"]
@@ -104,6 +107,7 @@ def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, se
     ]
     variables += [
         {"nombre": col, "tipo": "numerica", "dtype": "float",
+         "rango": list(config.RANGOS[col]), "entero": col in config.COLUMNAS_CONTEO,
          "imputacion": "mediana", "valor_imputacion": float(valor)}
         for col, valor in zip(config.COLUMNAS_NUMERICAS, imputador_num.statistics_)
     ]
@@ -114,6 +118,7 @@ def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, se
         "tipo_problema": "clasificacion_binaria",
         "variable_objetivo": target,
         "etiquetas": {str(k): v for k, v in config.ETIQUETAS.items()},
+        "umbral_decision": config.UMBRAL_DECISION,
         "algoritmo": type(estimador).__name__,
         "parametros_modelo": _serializable(estimador.get_params()),
         "semilla": semilla,
@@ -128,6 +133,7 @@ def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, se
             "n_observaciones": int(len(df)),
             "n_columnas": int(df.shape[1]),
             "tasa_nulos_simulados": tasa_nulos,
+            "proporcion_filas_con_nulos": filas_con_nulos,
         },
         "separacion": {
             "estrategia": "train_test_split aleatorio estratificado por la variable objetivo",
@@ -139,10 +145,12 @@ def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, se
             "validacion_cruzada": f"StratifiedKFold({folds_cv}) solo sobre entrenamiento" if folds_cv else None,
         },
         "metrica_evaluacion": config.METRICA_PRINCIPAL,
+        "advertencias": config.ADVERTENCIAS,
         "entorno": {
             "python": platform.python_version(),
             "librerias": {
                 "scikit-learn": sklearn.__version__,
+                "scipy": scipy.__version__,
                 "pandas": pd.__version__,
                 "numpy": np.__version__,
                 "joblib": joblib.__version__,
