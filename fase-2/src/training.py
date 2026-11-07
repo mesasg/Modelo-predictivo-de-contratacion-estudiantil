@@ -87,7 +87,8 @@ def entrenar(
         y_train=y_train, y_test=y_test,
     )
     rutas = guardar_version(directorio_salida, version, modelo, metricas, metadatos)
-    return {"version": version, "metricas": metricas, "rutas": rutas, "columnas_ignoradas": ignoradas}
+    return {"version": version, "modelo": modelo, "metricas": metricas, "rutas": rutas,
+            "columnas_ignoradas": ignoradas}
 
 
 def _metadatos(*, version, inicio, ruta_datos, df, target, ignoradas, modelo, semilla,

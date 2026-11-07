@@ -1,0 +1,11 @@
+branch,college_tier,cgpa,backlogs,coding_skills,dsa_score,aptitude_score,communication_skills,ml_knowledge,system_design,internships,projects_count,certifications,hackathons,open_source_contributions,extracurriculars
+EE,Tier-1,6.68,0,8.0,6.0,70.4,7.5,2.4,7.0,1,0,1,0,0,0
+IT,Tier-2,8.76,0,5.2,6.5,52.8,6.4,5.4,2.2,1,4,2,0,0,1
+EE,Tier-3,,2,2.9,5.1,69.1,7.4,4.5,2.7,0,1,2,2,0,1
+CSE,Tier-1,7.18,3,8.4,5.4,76.3,4.0,3.3,4.9,1,1,1,0,0,1
+Chemical,Tier-2,7.62,2,7.1,1.5,94.5,3.7,5.9,1.4,0,4,1,0,0,1
+ECE,,6.79,0,8.4,4.2,63.0,5.9,5.5,4.2,2,1,0,0,0,1
+CE,Tier-3,6.81,0,5.3,7.6,48.1,4.5,4.0,4.4,2,3,1,0,2,2
+Chemical,Tier-2,7.97,0,5.2,7.9,72.6,4.8,7.0,6.0,1,1,2,0,0,2
+CE,Tier-1,7.32,2,6.7,3.5,51.2,2.0,7.0,2.8,1,1,0,0,0,1
+IT,Tier-3,7.83,0,6.2,5.6,58.7,7.8,3.4,6.1,0,1,2,1,0,1

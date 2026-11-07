@@ -1,0 +1,30 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Cachés y temporales de Python y Jupyter
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Credenciales
+.env
+kaggle.json
+
+# Datos: el dataset completo se descarga según el README; solo se versiona el CSV de ejemplo
+fase-2/data/*
+!fase-2/data/ejemplo_prediccion.csv
+
+# Resultados generados por predict.py
+fase-2/outputs/
+
+# Carpetas temporales del guardado atómico de versiones (models/v1 y v2 sí se versionan)
+fase-2/models/.*-tmp-*/
