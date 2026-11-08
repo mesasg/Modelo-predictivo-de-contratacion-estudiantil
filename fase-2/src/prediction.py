@@ -111,6 +111,8 @@ def guardar_predicciones(resultados, ruta):
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as f:
             resultados.to_csv(f, index=False)
+        # mkstemp crea el archivo solo para su dueño (600); igual que las versiones, debe poder leerse fuera de Docker
+        os.chmod(temporal, 0o644)
         os.replace(temporal, ruta)
     except BaseException:
         Path(temporal).unlink(missing_ok=True)

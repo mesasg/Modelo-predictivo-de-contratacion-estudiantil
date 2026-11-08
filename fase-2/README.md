@@ -44,10 +44,12 @@ fase-2/
 │   ├── v1/                   # modelo.joblib, metrics.json, metadata.json
 │   └── v2/
 ├── outputs/                  # predicciones generadas (no se suben a Git)
-├── tests/                    # pruebas con pytest
+├── tests/
+│   ├── conftest.py           # datos sintéticos pequeños y una versión entrenada una sola vez
+│   └── test_aplicacion.py    # pruebas con pytest
 ├── requirements.txt
-├── pytest.ini
-├── Dockerfile
+├── pytest.ini                # configuración de pytest (carpeta tests/ y rutas de importación)
+├── Dockerfile                # imagen python:3.13-slim; no entrena durante la construcción
 ├── .dockerignore
 └── README.md
 ```
@@ -172,9 +174,9 @@ Una fila por cada fila de entrada, en el mismo orden:
 La predicción usa el umbral 0,5.
 
 ## Docker
-> **Pendiente:** verificar estos comandos con el `Dockerfile` final y pegar la evidencia.
+La imagen usa `python:3.13-slim`, instala `requirements.txt` y copia `src/`, `train.py`, `predict.py` y las pruebas. No tiene `ENTRYPOINT`: sin argumentos muestra la ayuda de `predict.py`. No entrena durante la construcción. Los datos, modelos y resultados se montan desde el equipo, así que persisten aunque el contenedor se elimine (`--rm`). Como la imagen no incluye `.git`, el hash del commit se pasa con `GIT_COMMIT`. El `.dockerignore` excluye `.git`, entornos virtuales, cachés, credenciales y las carpetas `data/`, `models/` y `outputs/`.
 
-La imagen usa `python:3.13-slim`, instala `requirements.txt` y copia `src/`, `train.py` y `predict.py`. No entrena durante la construcción. Los datos, modelos y resultados se montan desde el equipo, así que persisten aunque el contenedor se elimine (`--rm`). Como la imagen no incluye `.git`, el hash del commit se pasa con `GIT_COMMIT`.
+Las carpetas de versión y los CSV de predicción se crean con permisos de lectura para todos (755 y 644), así que se pueden abrir desde el equipo aunque el contenedor los cree como root. En Linux, para que además pertenezcan a tu usuario, agrega `--user "$(id -u):$(id -g)"` a `docker run`.
 
 **PowerShell** (desde `fase-2`):
 ```powershell
@@ -198,7 +200,7 @@ docker run --rm `
   --output outputs/predicciones_docker.csv
 ```
 
-**Bash:** en Git Bash para Windows hay que anteponer `MSYS_NO_PATHCONV=1` a cada `docker run` para que no se conviertan las rutas `/app/...`.
+**Bash** (verificado en macOS con zsh y Docker 28.5.1). En Git Bash para Windows hay que anteponer `MSYS_NO_PATHCONV=1` a cada `docker run` para que no se conviertan las rutas `/app/...`.
 ```bash
 docker build -t contratacion-fase2:1.0 .
 mkdir -p models outputs
@@ -215,12 +217,28 @@ docker run --rm \
 ```
 
 ## Pruebas
-> **Pendiente:** completar con la lista real de pruebas y su resultado.
-
-```powershell
+Desde `fase-2`, con el entorno activado (tardan unos segundos):
+```bash
 python -m pytest
 ```
-Las pruebas usan datos sintéticos pequeños y carpetas temporales (`tmp_path`). No descargan nada ni modifican `models/`.
+También se pueden ejecutar dentro de la imagen: `docker run --rm contratacion-fase2:1.0 python -m pytest`.
+
+Las pruebas generan 300 estudiantes sintéticos con el esquema real (`tests/conftest.py`), entrenan una sola versión para todas las pruebas y escriben en carpetas temporales (`tmp_path`). No descargan nada ni modifican `models/` ni `outputs/`.
+
+| Prueba (`tests/test_aplicacion.py`) | Qué comprueba |
+|---|---|
+| `test_entrenamiento_genera_artefacto_metricas_y_metadatos` | Se crean `modelo.joblib`, `metrics.json` y `metadata.json`. El artefacto es el pipeline completo con las 16 variables (sin objetivo ni salario), el modelo supera al modelo base y los metadatos traen versión, objetivo, algoritmo, semilla, datos, separación y commit |
+| `test_prediccion_conserva_los_resultados_del_modelo_entrenado` | El modelo cargado da una predicción por fila, en orden, con los mismos puntajes del modelo en memoria (tolerancia 1e-6), y predecir no modifica la versión |
+| `test_orden_de_columnas_y_columnas_adicionales_no_cambian_la_prediccion` | Reordenar columnas o agregar columnas extra (incluida `placement_status`) da el mismo resultado y se avisa |
+| `test_valores_faltantes_se_imputan_con_lo_aprendido_en_entrenamiento` | Una celda vacía (numérica o categórica) da lo mismo que la mediana o la moda guardadas en `metadata.json` |
+| `test_celdas_vacias_en_el_csv_se_procesan_desde_la_linea_de_comandos` | `predict.py` acepta un CSV con celdas vacías y predice todas las filas |
+| `test_columna_ausente_termina_con_error_y_sin_archivo_de_salida` | Sin `cgpa`, `predict.py` termina con código distinto de 0, explica el error y no crea el CSV de salida |
+| `test_tipos_y_rangos_invalidos_se_rechazan` (4 casos) | Texto en una numérica, `cgpa` > 10, `aptitude_score` < 0 y conteo no entero producen `ErrorDatos` |
+| `test_categoria_no_vista_se_predice_y_se_informa` | Una carrera desconocida no detiene la predicción y se avisa |
+| `test_modelo_inexistente_termina_con_error` | Una versión que no existe termina con código distinto de 0 y sin salida |
+| `test_nueva_version_conserva_la_anterior_y_no_se_sobrescribe` | Crear v2 no cambia los archivos de v1; repetir v1 falla (función y `train.py`); ambas versiones se cargan con sus parámetros; no quedan carpetas temporales |
+| `test_version_y_predicciones_son_legibles_fuera_del_contenedor` | Las carpetas de versión quedan con permisos 755 y las predicciones con 644 (se omite en Windows) |
+| `test_ayuda_disponible` (2 casos) | `train.py --help` y `predict.py --help` funcionan |
 
 ## Resultados
 Evaluación en el conjunto de prueba (20.000 estudiantes), con `--seed 42`:
@@ -240,7 +258,8 @@ Evaluación en el conjunto de prueba (20.000 estudiantes), con `--seed 42`:
 - **Nulos simulados:** el 5 % de nulos por predictora afecta a ≈ 56 % de las filas, más de lo habitual en datos reales.
 - **Puntajes no calibrados:** por `class_weight='balanced'`, `puntaje_contratado` no es la probabilidad real de contratación.
 - **Umbral sin ajustar:** el umbral 0,5 no se ajustó al costo de cada tipo de error. Si se cambia, debe elegirse solo con validación, nunca con el conjunto de prueba.
-- **Reproducibilidad:** la semilla (42) fija la separación, los nulos simulados, la validación cruzada y el modelo, y el optimizador `lbfgs` es determinista. Con los mismos datos y versiones de `requirements.txt` los resultados se repiten; entre sistemas operativos pueden aparecer diferencias numéricas mínimas.
+- **Reproducibilidad:** la semilla (42) fija la separación, los nulos simulados, la validación cruzada y el modelo, y el optimizador `lbfgs` es determinista. Con los mismos datos y versiones de `requirements.txt` los resultados se repiten; entre sistemas operativos pueden aparecer diferencias numéricas mínimas. En la práctica, Windows, macOS y Docker (Linux) dieron exactamente las mismas métricas.
+- **Advertencias en macOS:** en Mac con Apple Silicon, numpy usa la librería Accelerate y emite falsas alarmas `RuntimeWarning: ... encountered in matmul` al entrenar. Como las métricas son idénticas a las de los otros sistemas, `train.py` y `pytest.ini` silencian solo esas advertencias.
 
 ## Evidencia de ejecución
 **Entrenamiento de v1:**
@@ -301,7 +320,56 @@ Error: Faltan columnas obligatorias: cgpa
 ```
 El proceso termina con código 1 y no se crea `outputs/x.csv`.
 
-> **Pendiente:** agregar la salida de `python -m pytest` y de los dos comandos de Docker.
+**Pruebas** (macOS, Python 3.13):
+```
+$ python -m pytest
+============================= test session starts ==============================
+collected 16 items
+
+tests/test_aplicacion.py ................                                [100%]
+
+============================== 16 passed in 3.74s ==============================
+```
+Dentro del contenedor (`docker run --rm contratacion-fase2:1.0 python -m pytest`) también pasan las 16.
+
+**Docker** (macOS con zsh, Docker 28.5.1, comandos de la sección [Docker](#docker) desde `fase-2`):
+```
+$ docker run --rm -e GIT_COMMIT=$(git rev-parse HEAD) -v "$PWD/data:/app/data:ro" -v "$PWD/models:/app/models" contratacion-fase2:1.0 python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v-docker --seed 42
+Entrenando versión 'v-docker' con 'data/student_placement_synthetic.csv'...
+
+Versión 'v-docker' entrenada y guardada.
+Evaluación en prueba (20000 filas):
+  Métrica             Modelo      Base
+  roc_auc             0.6786    0.5000
+  f1_clase0           0.5202    0.0000
+  recall_clase0       0.6450    0.0000
+  precision_clase0    0.4359    0.0000
+  accuracy            0.6249    0.6847
+  ROC-AUC en validación cruzada (5 partes): 0.6799 ± 0.0049
+Archivos generados:
+  models/v-docker/modelo.joblib
+  models/v-docker/metrics.json
+  models/v-docker/metadata.json
+
+$ docker run --rm -v "$PWD/data:/app/data:ro" -v "$PWD/models:/app/models:ro" -v "$PWD/outputs:/app/outputs" contratacion-fase2:1.0 python predict.py --model models/v-docker/modelo.joblib --input data/ejemplo_prediccion.csv --output outputs/predicciones_docker.csv
+Modelo: models/v-docker/modelo.joblib (versión: v-docker)
+Filas predichas: 10
+  no contratado: 6
+  contratado: 4
+Aviso: 2 celdas vacías se imputaron con los valores aprendidos en el entrenamiento
+Nota: puntaje_contratado ordena a los estudiantes; no es una probabilidad calibrada.
+Predicciones guardadas en: outputs/predicciones_docker.csv
+
+$ ls -l models/v-docker outputs
+models/v-docker:
+-rw-r--r--  1 juantabares  staff  6361 Nov  7 20:40 metadata.json
+-rw-r--r--  1 juantabares  staff  1228 Nov  7 20:40 metrics.json
+-rw-r--r--  1 juantabares  staff  5626 Nov  7 20:40 modelo.joblib
+
+outputs:
+-rw-r--r--  1 juantabares  staff  301 Nov  7 20:40 predicciones_docker.csv
+```
+Los contenedores se eliminan al terminar (`--rm`), pero el modelo y las predicciones quedan en el equipo. Las métricas y predicciones en Docker son idénticas a las de la ejecución local. Una entrada sin `cgpa` dentro del contenedor también termina con `Error: Faltan columnas obligatorias: cgpa` y código 1, y repetir `--version v-docker` termina con código 1 sin modificar la versión existente.
 
 ## Fuentes
 - Dataset: [Student Placement Prediction Dataset](https://www.kaggle.com/datasets/suhanigupta04/student-placement-prediction-dataset), Kaggle.
