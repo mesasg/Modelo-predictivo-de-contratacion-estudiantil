@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Cachés y temporales de Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Credenciales
+.env
+kaggle.json
+
+# Datos, modelos y resultados: se montan como volúmenes al ejecutar el contenedor
+data/
+models/
+outputs/
+
+# Archivos que la imagen no necesita
+Dockerfile
+.dockerignore
+README.md
+.DS_Store
+.vscode/
+.idea/
