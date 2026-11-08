@@ -23,7 +23,7 @@ En la [Fase 1](../fase-1/README.md) el proceso completo estaba en un notebook. E
 - Se agregó la precisión de la clase 0 a las métricas.
 - Pensando en la API, se validan tipos, rangos y conteos enteros, y se informan las categorías no vistas en el entrenamiento.
 - `metadata.json` registra las advertencias de alcance: datos sintéticos, puntajes no calibrados y umbral 0,5 sin ajustar a costos.
-- Cada Pull Request hacia `develop` lo revisa y aprueba el otro integrante antes del merge.
+- Revisión de Pull Requests: en los primeros PR de esta fase (#12 a #14) la revisión no quedó registrada antes del merge; la aprobación del #13 se hizo después de integrarlo. Desde el #16, cada PR hacia `develop` lo aprueba el otro integrante, con un comentario de lo revisado, antes del merge.
 
 ## Estructura
 ```
@@ -83,7 +83,9 @@ En Bash (Linux, macOS o Git Bash), la activación es `source .venv/bin/activate`
 ```powershell
 python train.py --help
 python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v1 --seed 42
+python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v2 --seed 42 --C 0.1
 ```
+Las versiones `models/v1` y `models/v2` del repositorio se generaron con estos dos comandos (macOS, Python 3.13), con el código del commit `71ad0fd` registrado en su `metadata.json`. Como ya existen, para probar el entrenamiento use otro identificador (por ejemplo `--version v3`).
 
 | Argumento | Por defecto | Descripción |
 |---|---|---|
@@ -280,6 +282,26 @@ Archivos generados:
   models\v1\modelo.joblib
   models\v1\metrics.json
   models\v1\metadata.json
+```
+
+**Entrenamiento de v2** (macOS; misma partición y semilla, más regularización):
+```
+$ python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v2 --seed 42 --C 0.1
+Entrenando versión 'v2' con 'data/student_placement_synthetic.csv'...
+
+Versión 'v2' entrenada y guardada.
+Evaluación en prueba (20000 filas):
+  Métrica             Modelo      Base
+  roc_auc             0.6786    0.5000
+  f1_clase0           0.5203    0.0000
+  recall_clase0       0.6450    0.0000
+  precision_clase0    0.4360    0.0000
+  accuracy            0.6250    0.6847
+  ROC-AUC en validación cruzada (5 partes): 0.6799 ± 0.0049
+Archivos generados:
+  models/v2/modelo.joblib
+  models/v2/metrics.json
+  models/v2/metadata.json
 ```
 
 **Identificador repetido:**
