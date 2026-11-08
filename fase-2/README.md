@@ -23,7 +23,7 @@ En la [Fase 1](../fase-1/README.md) el proceso completo estaba en un notebook. E
 - Se agregó la precisión de la clase 0 a las métricas.
 - Pensando en la API, se validan tipos, rangos y conteos enteros, y se informan las categorías no vistas en el entrenamiento.
 - `metadata.json` registra las advertencias de alcance: datos sintéticos, puntajes no calibrados y umbral 0,5 sin ajustar a costos.
-- Revisión de Pull Requests: en los primeros PR de esta fase (#12 a #14) la revisión no quedó registrada antes del merge; la aprobación del #13 se hizo después de integrarlo. Desde el #16, cada PR hacia `develop` lo aprueba el otro integrante, con un comentario de lo revisado, antes del merge.
+- Revisión de Pull Requests: en los primeros PR de esta fase (#12 a #14) la revisión no quedó registrada antes del merge; la aprobación del #13 se hizo después de integrarlo. Los PR #16 (Docker y pruebas) y #17 (versiones del modelo y documentación) hacia `develop` los aprobó el otro integrante antes del merge.
 
 ## Estructura
 ```
@@ -399,4 +399,11 @@ Los contenedores se eliminan al terminar (`--rm`), pero el modelo y las predicci
 - Documentación de [scikit-learn](https://scikit-learn.org/1.6/) (`Pipeline`, `ColumnTransformer`, persistencia de modelos) y de [Docker](https://docs.docker.com/).
 
 ## Versión entregada
-> **Pendiente:** etiqueta `entrega-2` en `main` y el hash de su commit.
+La Entrega 2 corresponde a la etiqueta de Git **`entrega-2`**, creada sobre el commit de `main` que integra `develop` al cerrar la fase. Para obtener exactamente esa versión:
+```bash
+git clone https://github.com/mesasg/Modelo-predictivo-de-contratacion-estudiantil.git
+cd Modelo-predictivo-de-contratacion-estudiantil
+git checkout entrega-2
+git rev-parse "entrega-2^{commit}"    # hash del commit entregado
+```
+La etiqueta identifica el código entregado; las versiones del modelo son las carpetas `models/v1` y `models/v2`.
