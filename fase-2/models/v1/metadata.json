@@ -1,0 +1,273 @@
+{
+  "version": "v1",
+  "fecha_creacion": "2026-11-08T01:57:57+00:00",
+  "tipo_problema": "clasificacion_binaria",
+  "variable_objetivo": "placement_status",
+  "etiquetas": {
+    "0": "no contratado",
+    "1": "contratado"
+  },
+  "umbral_decision": 0.5,
+  "algoritmo": "LogisticRegression",
+  "parametros_modelo": {
+    "C": 1.0,
+    "class_weight": "balanced",
+    "dual": false,
+    "fit_intercept": true,
+    "intercept_scaling": 1,
+    "l1_ratio": null,
+    "max_iter": 1000,
+    "multi_class": "deprecated",
+    "n_jobs": null,
+    "penalty": "l2",
+    "random_state": 42,
+    "solver": "lbfgs",
+    "tol": 0.0001,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "semilla": 42,
+  "variables_entrada": [
+    {
+      "nombre": "branch",
+      "tipo": "categorica",
+      "dtype": "str",
+      "imputacion": "moda",
+      "valor_imputacion": "CSE",
+      "categorias": [
+        "CE",
+        "CSE",
+        "Chemical",
+        "ECE",
+        "EE",
+        "IT",
+        "ME"
+      ]
+    },
+    {
+      "nombre": "college_tier",
+      "tipo": "categorica",
+      "dtype": "str",
+      "imputacion": "moda",
+      "valor_imputacion": "Tier-3",
+      "categorias": [
+        "Tier-1",
+        "Tier-2",
+        "Tier-3"
+      ]
+    },
+    {
+      "nombre": "cgpa",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 7.21
+    },
+    {
+      "nombre": "backlogs",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 0.0
+    },
+    {
+      "nombre": "coding_skills",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 6.0
+    },
+    {
+      "nombre": "dsa_score",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 5.5
+    },
+    {
+      "nombre": "aptitude_score",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        100
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 65.0
+    },
+    {
+      "nombre": "communication_skills",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 6.0
+    },
+    {
+      "nombre": "ml_knowledge",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 4.5
+    },
+    {
+      "nombre": "system_design",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        10
+      ],
+      "entero": false,
+      "imputacion": "mediana",
+      "valor_imputacion": 4.0
+    },
+    {
+      "nombre": "internships",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 1.0
+    },
+    {
+      "nombre": "projects_count",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 2.0
+    },
+    {
+      "nombre": "certifications",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 1.0
+    },
+    {
+      "nombre": "hackathons",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 1.0
+    },
+    {
+      "nombre": "open_source_contributions",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 0.0
+    },
+    {
+      "nombre": "extracurriculars",
+      "tipo": "numerica",
+      "dtype": "float",
+      "rango": [
+        0,
+        null
+      ],
+      "entero": true,
+      "imputacion": "mediana",
+      "valor_imputacion": 1.0
+    }
+  ],
+  "variables_excluidas": {
+    "salary_package_lpa": "posterior al evento (fuga de información)"
+  },
+  "columnas_ignoradas": [],
+  "tratamiento_desconocidos": "categorías no vistas en el entrenamiento se codifican como ceros (OneHotEncoder handle_unknown='ignore')",
+  "datos": {
+    "fuente": "https://www.kaggle.com/datasets/suhanigupta04/student-placement-prediction-dataset",
+    "archivo": "student_placement_synthetic.csv",
+    "sha256": "53bfd871cd49b6460b2964718f54b85e68479f2e77a4e45e9790edf4447c27d1",
+    "n_observaciones": 100000,
+    "n_columnas": 18,
+    "tasa_nulos_simulados": 0.05,
+    "proporcion_filas_con_nulos": 0.55859
+  },
+  "separacion": {
+    "estrategia": "train_test_split aleatorio estratificado por la variable objetivo",
+    "tamano_prueba": 0.2,
+    "n_entrenamiento": 80000,
+    "n_prueba": 20000,
+    "proporcion_clase1_entrenamiento": 0.68475,
+    "proporcion_clase1_prueba": 0.68475,
+    "validacion_cruzada": "StratifiedKFold(5) solo sobre entrenamiento"
+  },
+  "metrica_evaluacion": "roc_auc",
+  "advertencias": [
+    "Datos sintéticos: los coeficientes describen asociaciones del modelo con este dataset, no efectos causales del mercado laboral; validar con datos reales de egresados antes de usarlos como evidencia.",
+    "Con class_weight='balanced', predict_proba entrega un puntaje para ordenar estudiantes, no una probabilidad calibrada.",
+    "El umbral 0,5 no se ajustó a un costo de errores; si se cambia, debe elegirse solo con validación, nunca con prueba."
+  ],
+  "entorno": {
+    "python": "3.13.18",
+    "librerias": {
+      "scikit-learn": "1.6.1",
+      "scipy": "1.15.3",
+      "pandas": "2.2.3",
+      "numpy": "2.1.3",
+      "joblib": "1.6.0"
+    },
+    "archivo_dependencias": "requirements.txt"
+  },
+  "codigo": {
+    "git_commit": "71ad0fd9f391d9efbeb1340c1e091a66c75a3950",
+    "cambios_sin_commit": false,
+    "origen": "git"
+  }
+}

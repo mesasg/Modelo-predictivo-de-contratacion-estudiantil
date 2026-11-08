@@ -1,0 +1,62 @@
+{
+  "metrica_principal": "roc_auc",
+  "conjunto_evaluacion": "prueba",
+  "n_prueba": 20000,
+  "modelo": {
+    "roc_auc": 0.6785503487528082,
+    "f1_clase0": 0.5202097723202865,
+    "recall_clase0": 0.6450436161776368,
+    "precision_clase0": 0.4358589647411853,
+    "accuracy": 0.6249,
+    "matriz_confusion": [
+      [
+        4067,
+        2238
+      ],
+      [
+        5264,
+        8431
+      ]
+    ]
+  },
+  "modelo_base": {
+    "roc_auc": 0.5,
+    "f1_clase0": 0.0,
+    "recall_clase0": 0.0,
+    "precision_clase0": 0.0,
+    "accuracy": 0.68475,
+    "matriz_confusion": [
+      [
+        0,
+        6305
+      ],
+      [
+        0,
+        13695
+      ]
+    ]
+  },
+  "validacion_cruzada": {
+    "folds": 5,
+    "roc_auc": {
+      "media": 0.6798776028343785,
+      "desviacion": 0.004878235560387105
+    },
+    "f1_clase0": {
+      "media": 0.5192260170551296,
+      "desviacion": 0.005585939472229761
+    },
+    "recall_clase0": {
+      "media": 0.6433782712133227,
+      "desviacion": 0.009353283298247797
+    },
+    "precision_clase0": {
+      "media": 0.4352907902056173,
+      "desviacion": 0.0056872181593882855
+    },
+    "accuracy": {
+      "media": 0.6243875,
+      "desviacion": 0.0059386709371710535
+    }
+  }
+}

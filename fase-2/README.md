@@ -23,7 +23,7 @@ En la [Fase 1](../fase-1/README.md) el proceso completo estaba en un notebook. E
 - Se agregó la precisión de la clase 0 a las métricas.
 - Pensando en la API, se validan tipos, rangos y conteos enteros, y se informan las categorías no vistas en el entrenamiento.
 - `metadata.json` registra las advertencias de alcance: datos sintéticos, puntajes no calibrados y umbral 0,5 sin ajustar a costos.
-- Cada Pull Request hacia `develop` lo revisa y aprueba el otro integrante antes del merge.
+- Revisión de Pull Requests: en los primeros PR de esta fase (#12 a #14) la revisión no quedó registrada antes del merge; la aprobación del #13 se hizo después de integrarlo. Los PR #16 (Docker y pruebas) y #17 (versiones del modelo y documentación) hacia `develop` los aprobó el otro integrante antes del merge.
 
 ## Estructura
 ```
@@ -83,7 +83,9 @@ En Bash (Linux, macOS o Git Bash), la activación es `source .venv/bin/activate`
 ```powershell
 python train.py --help
 python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v1 --seed 42
+python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v2 --seed 42 --C 0.1
 ```
+Las versiones `models/v1` y `models/v2` del repositorio se generaron con estos dos comandos (macOS, Python 3.13), con el código del commit `71ad0fd` registrado en su `metadata.json`. Como ya existen, para probar el entrenamiento use otro identificador (por ejemplo `--version v3`).
 
 | Argumento | Por defecto | Descripción |
 |---|---|---|
@@ -282,6 +284,26 @@ Archivos generados:
   models\v1\metadata.json
 ```
 
+**Entrenamiento de v2** (macOS; misma partición y semilla, más regularización):
+```
+$ python train.py --data data/student_placement_synthetic.csv --target placement_status --output-dir models --version v2 --seed 42 --C 0.1
+Entrenando versión 'v2' con 'data/student_placement_synthetic.csv'...
+
+Versión 'v2' entrenada y guardada.
+Evaluación en prueba (20000 filas):
+  Métrica             Modelo      Base
+  roc_auc             0.6786    0.5000
+  f1_clase0           0.5203    0.0000
+  recall_clase0       0.6450    0.0000
+  precision_clase0    0.4360    0.0000
+  accuracy            0.6250    0.6847
+  ROC-AUC en validación cruzada (5 partes): 0.6799 ± 0.0049
+Archivos generados:
+  models/v2/modelo.joblib
+  models/v2/metrics.json
+  models/v2/metadata.json
+```
+
 **Identificador repetido:**
 ```
 > python train.py --data data/student_placement_synthetic.csv --output-dir models --version v1
@@ -377,4 +399,11 @@ Los contenedores se eliminan al terminar (`--rm`), pero el modelo y las predicci
 - Documentación de [scikit-learn](https://scikit-learn.org/1.6/) (`Pipeline`, `ColumnTransformer`, persistencia de modelos) y de [Docker](https://docs.docker.com/).
 
 ## Versión entregada
-> **Pendiente:** etiqueta `entrega-2` en `main` y el hash de su commit.
+La Entrega 2 corresponde a la etiqueta de Git **`entrega-2`**, creada sobre el commit de `main` que integra `develop` al cerrar la fase. Para obtener exactamente esa versión:
+```bash
+git clone https://github.com/mesasg/Modelo-predictivo-de-contratacion-estudiantil.git
+cd Modelo-predictivo-de-contratacion-estudiantil
+git checkout entrega-2
+git rev-parse "entrega-2^{commit}"    # hash del commit entregado
+```
+La etiqueta identifica el código entregado; las versiones del modelo son las carpetas `models/v1` y `models/v2`.
