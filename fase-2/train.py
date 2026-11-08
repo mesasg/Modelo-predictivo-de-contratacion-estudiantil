@@ -6,6 +6,7 @@ Ejemplo (desde fase-2):
 
 import argparse
 import sys
+import warnings
 
 from src import config
 from src.data import ErrorDatos
@@ -84,6 +85,9 @@ def imprimir_resumen(resultado):
 
 def main(argv=None):
     args = crear_parser().parse_args(argv)
+    # En macOS con Apple Silicon, numpy usa Accelerate y emite falsas alarmas "encountered in matmul"
+    # durante el ajuste; las métricas son idénticas a las de Windows y Linux. Solo se silencian esas.
+    warnings.filterwarnings("ignore", message=r".*encountered in matmul", category=RuntimeWarning)
     version = args.version or version_automatica()
     print(f"Entrenando versión '{version}' con '{args.data}'...")
     try:

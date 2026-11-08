@@ -74,6 +74,9 @@ def guardar_version(directorio_salida, version, modelo, metricas, metadatos):
 
     temporal = Path(tempfile.mkdtemp(prefix=f".{version}-tmp-", dir=directorio_salida))
     try:
+        # mkdtemp crea la carpeta solo para su dueño (700); al renombrarla conservaría esos permisos
+        # y una versión creada por root en Docker no se podría leer desde el equipo anfitrión
+        temporal.chmod(0o755)
         joblib.dump(modelo, temporal / NOMBRE_MODELO)
         _escribir_json(temporal / NOMBRE_METRICAS, metricas)
         _escribir_json(temporal / NOMBRE_METADATOS, metadatos)

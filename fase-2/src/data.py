@@ -52,8 +52,9 @@ def preparar_variables(df):
         _validar_rango(X[col], col)
 
     for col in COLUMNAS_CATEGORICAS:
-        X[col] = X[col].where(X[col].isna(), X[col].astype(str)).astype(object)
-        X[col] = X[col].fillna(np.nan)
+        # Texto en las celdas con valor y np.nan en las vacías (el imputador no reconoce None)
+        valores = X[col].astype(object)
+        X[col] = valores.where(valores.isna(), valores.astype(str)).where(valores.notna(), np.nan)
 
     adicionales = [c for c in df.columns if c not in COLUMNAS_ENTRADA]
     return X, adicionales
